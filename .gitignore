@@ -30,3 +30,6 @@ npm-debug.log*
 /platforms
 /plugins
 /www
+/android
+/ios
+zscaler_root_ca.pem

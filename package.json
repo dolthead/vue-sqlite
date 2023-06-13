@@ -9,12 +9,17 @@
     "preview": "vite preview",
     "test:e2e": "cypress run",
     "test:unit": "vitest",
-    "lint": "eslint"
+    "lint": "eslint",
+    "android": "npx cap run android --target=Pixel_5_API_33  --external --public-host=100.64.0.1",
+    "ios": "npx ionic build && npx cap copy ios && npx cap run ios --target=C43D4C7D-BF80-420C-A707-20327F4B9213  --external --no-build --public-host=100.64.0.1"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^5.0.2",
+    "@capacitor/android": "5.0.5",
     "@capacitor/app": "5.0.3",
     "@capacitor/core": "5.0.5",
     "@capacitor/haptics": "5.0.4",
+    "@capacitor/ios": "5.0.5",
     "@capacitor/keyboard": "5.0.4",
     "@capacitor/status-bar": "5.0.4",
     "@ionic/vue": "^7.0.0",
