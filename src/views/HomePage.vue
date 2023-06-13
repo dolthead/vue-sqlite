@@ -6,24 +6,40 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true">
-      <ion-item v-if="editItem">
-        <ion-input type="text" label="New item" v-model="editItem.name" @keyup.enter="updateItem"></ion-input>
+    <ion-content :fullscreen="true" class="ion-padding-top">
+      <ion-item v-if="editItem" lines="full">
+        <ion-label>Edit Item</ion-label>
+        <ion-input type="text" label="Edit item" v-model="editItem.name" fill="outline" mode="md"
+          @keyup.enter="updateItem" @keyup.escape="editItem = undefined" label-placement="stacked"></ion-input>
         <ion-buttons slot="end">
-          <ion-button @click="editItem = undefined">Cancel</ion-button>
-          <ion-button @click="updateItem">Save</ion-button>
+          <ion-button @click="updateItem" title="Save">
+            <ion-icon slot="icon-only" :icon="saveOutline"></ion-icon>
+          </ion-button>
+          <ion-button @click="editItem = undefined" title="Cancel">
+            <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+          </ion-button>
         </ion-buttons>
       </ion-item>
-      <ion-item v-else>
-        <ion-input type="text" label="New item" v-model="inputName" @keyup.enter="addItem"></ion-input>
-        <ion-button slot="end" @click="addItem">Add</ion-button>
+      <ion-item v-else lines="full">
+        <ion-label>New Item</ion-label>
+        <ion-input type="text" label="New item" v-model="inputName" fill="outline" mode="md"
+          @keyup.enter="addItem" label-placement="stacked"></ion-input>
+        <ion-buttons slot="end">
+          <ion-button @click="addItem" color="success" title="Add">
+            <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-item>
 
-      <ion-item v-for="item in items" :key="item.id">
+      <ion-item v-for="item in items" :key="item.id" lines="full" @click="setEditItem(item)" :disabled="editItem">
         <ion-label>{{ item.name }}</ion-label>
         <ion-buttons slot="end">
-          <ion-button @click="setEditItem(item)" color="danger">Edit</ion-button>
-          <ion-button @click="deleteItem(item.id)" color="danger">Del</ion-button>
+          <ion-button @click.stop="setEditItem(item)" :disabled="editItem" title="Edit">
+            <ion-icon slot="icon-only" :icon="createOutline"></ion-icon>
+          </ion-button>
+          <ion-button @click.stop="deleteItem(item.id)" color="danger" :disabled="editItem" title="Delete">
+            <ion-icon slot="icon-only" :icon="trashOutline"></ion-icon>
+          </ion-button>
         </ion-buttons>
       </ion-item>
     </ion-content>
@@ -32,8 +48,9 @@
 
 <script setup lang="ts">
 import { CapacitorSQLite, SQLiteConnection, SQLiteDBConnection } from '@capacitor-community/sqlite';
-import { IonButtons, IonInput, IonButton, IonItem, IonLabel, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, onIonViewDidEnter, onIonViewWillLeave } from '@ionic/vue';
+import { IonIcon, IonButtons, IonInput, IonButton, IonItem, IonLabel, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, onIonViewDidEnter, onIonViewWillLeave, toastController } from '@ionic/vue';
 import { ref } from 'vue';
+import { addOutline, saveOutline, trashOutline, createOutline, closeOutline } from 'ionicons/icons';
 
 let sqlite: SQLiteConnection;
 let db: SQLiteDBConnection;
@@ -55,7 +72,6 @@ onIonViewDidEnter(async () => {
 
     await db.open();
     
-    console.log(`db: db_vite opened`);
     const query = `CREATE TABLE IF NOT EXISTS test (
         id INTEGER PRIMARY KEY NOT NULL,
         name TEXT NOT NULL
@@ -90,6 +106,7 @@ const addItem = async () => {
       await db.query(query2, [newId, inputName.value]);
       items.value.push({ id: newId, name: inputName.value });
       inputName.value = '';
+      toast("Item added");
     } catch (error) {
       console.error((error as Error).message);
     } finally {
@@ -107,6 +124,7 @@ const updateItem = async () => {
       inputName.value = '';
       items.value.find((x: any) => x.id == editItem.value.id).name = editItem.value.name;
       editItem.value = undefined;
+      toast("Item updated");
     } catch (error) {
       console.error((error as Error).message);
     } finally {
@@ -121,12 +139,26 @@ const deleteItem = async (id: string) => {
     const query = 'delete from test where id = ?';
     await db.query(query, [id]);
     items.value = items.value.filter((x: any) => x.id != id);
+    toast("Item deleted");
   } catch (error) {
     console.error((error as Error).message);
   } finally {
     await db.close();
   }
 };
+
+const toast = async (message: string) => {
+  const toast = await toastController.create({
+      message,
+      duration: 2500,
+      position: "bottom",
+    });
+    toast.present();
+};
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped>
+  ion-input {
+    margin-block: 12px;
+  }
+</style>

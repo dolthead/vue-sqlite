@@ -31,7 +31,6 @@ import {
 import { JeepSqlite } from "jeep-sqlite/dist/components/jeep-sqlite";
 
 customElements.define("jeep-sqlite", JeepSqlite);
-console.log(`after customElements.define`);
 
 window.addEventListener("DOMContentLoaded", async () => {
   try {
